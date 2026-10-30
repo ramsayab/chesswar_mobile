@@ -1,125 +1,355 @@
 import 'package:flutter/material.dart';
+import 'theme/app_theme.dart';
+import 'widgets/common_widgets.dart';
+
+// Screens
+import 'screens/home_screen.dart';
+import 'screens/stats_history_screen.dart';
+import 'screens/arena_screen.dart';
+import 'screens/draft_screen.dart';
+import 'screens/power_reveal_screen.dart';
+import 'screens/gameplay_screen.dart';
+import 'screens/game_over_screen.dart';
+import 'screens/puzzles_screen.dart';
+import 'screens/puzzle_detail_screen.dart';
+import 'screens/leaderboard_screen.dart';
+import 'screens/profile_screen.dart';
+import 'screens/admin_screen.dart';
+import 'screens/ai_puzzle_generator_screen.dart';
+import 'screens/register_screen.dart';
+import 'screens/login_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ChessWarApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class ChessWarApp extends StatelessWidget {
+  const ChessWarApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      title: 'Chess War Mobile',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
+        scaffoldBackgroundColor: const Color(0xFFF0F2F6),
+        fontFamily: 'Roboto',
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: AppColors.inkDark,
+          primary: AppColors.inkDark,
+        ),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const PrototypeRootScreen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
+enum ScreenId {
+  home,
+  statsHistory,
+  arenaDifficulty,
+  draftPowers,
+  powerReveal,
+  gameplay,
+  gameOver,
+  puzzlesList,
+  puzzleDetail,
+  leaderboard,
+  profile,
+  adminPanel,
+  aiPuzzleGenerator,
+  register,
+  login,
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class PrototypeRootScreen extends StatefulWidget {
+  const PrototypeRootScreen({super.key});
 
-  void _incrementCounter() {
+  @override
+  State<PrototypeRootScreen> createState() => _PrototypeRootScreenState();
+}
+
+class _PrototypeRootScreenState extends State<PrototypeRootScreen> {
+  ScreenId currentScreen = ScreenId.home;
+  int currentNavIndex = 0;
+  String currentPuzzleTitle = 'Back-Rank Basics';
+
+  void _navigateTo(ScreenId screen) {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      currentScreen = screen;
+      // Sync bottom nav index if on a tab screen
+      if (screen == ScreenId.home) currentNavIndex = 0;
+      if (screen == ScreenId.arenaDifficulty) currentNavIndex = 1;
+      if (screen == ScreenId.puzzlesList) currentNavIndex = 2;
+      if (screen == ScreenId.leaderboard) currentNavIndex = 3;
+      if (screen == ScreenId.profile) currentNavIndex = 4;
     });
+  }
+
+  void _onBottomNavTap(int index) {
+    setState(() {
+      currentNavIndex = index;
+      switch (index) {
+        case 0:
+          currentScreen = ScreenId.home;
+          break;
+        case 1:
+          currentScreen = ScreenId.arenaDifficulty;
+          break;
+        case 2:
+          currentScreen = ScreenId.puzzlesList;
+          break;
+        case 3:
+          currentScreen = ScreenId.leaderboard;
+          break;
+        case 4:
+          currentScreen = ScreenId.profile;
+          break;
+      }
+    });
+  }
+
+  // Quick picker dialog to test any of the 15 mockups instantly
+  void _openQuickMockupPicker() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        final mockups = [
+          (ScreenId.home, 'Image 2: Beranda (Halo, Asep)'),
+          (ScreenId.statsHistory, 'Image 2: Statistik & Riwayat'),
+          (ScreenId.arenaDifficulty, 'Image 5: Arena (Pilih tingkat bot)'),
+          (ScreenId.draftPowers, 'Image 5: Draft Kekuatan (6 Kartu)'),
+          (ScreenId.powerReveal, 'Image 5: Kekuatan Terpilih (Undying King)'),
+          (ScreenId.gameplay, 'Image 4: Gameplay Arena vs Bot'),
+          (ScreenId.gameOver, 'Image 4: Menang! (Hasil & XP)'),
+          (ScreenId.puzzlesList, 'Image 3: Latihan Puzzle (Tabs)'),
+          (ScreenId.puzzleDetail, 'Image 3: Puzzle Gameplay (Back-Rank)'),
+          (ScreenId.leaderboard, 'Image 3: Leaderboard'),
+          (ScreenId.profile, 'Image 1: Profil & Akun'),
+          (ScreenId.adminPanel, 'Image 1: Panel Admin (Statistik & Menu)'),
+          (ScreenId.aiPuzzleGenerator, 'Image 1: AI Puzzle Generator'),
+          (ScreenId.register, 'Image 2: Buat Akun (Register)'),
+          (ScreenId.login, 'Mockup: Masuk (Login)'),
+        ];
+
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Pilih Layar Mockup',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.inkDark,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, size: 20),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(color: AppColors.line),
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: mockups.length,
+                  itemBuilder: (context, index) {
+                    final item = mockups[index];
+                    final isCurrent = item.$1 == currentScreen;
+                    return ListTile(
+                      dense: true,
+                      selected: isCurrent,
+                      selectedTileColor: AppColors.pale,
+                      title: Text(
+                        item.$2,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight:
+                              isCurrent ? FontWeight.w800 : FontWeight.w600,
+                          color: isCurrent ? AppColors.inkDark : AppColors.muted,
+                        ),
+                      ),
+                      trailing: isCurrent
+                          ? const Icon(Icons.check,
+                              color: AppColors.inkDark, size: 18)
+                          : null,
+                      onTap: () {
+                        Navigator.pop(context);
+                        _navigateTo(item.$1);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+    // Determine screen content
+    Widget content;
+    bool showNavBar = false;
+
+    switch (currentScreen) {
+      case ScreenId.home:
+        showNavBar = true;
+        content = HomeScreen(
+          onResumeGame: () => _navigateTo(ScreenId.gameplay),
+          onPlayNow: () => _navigateTo(ScreenId.arenaDifficulty),
+          onViewAllHistory: () => _navigateTo(ScreenId.statsHistory),
+          onOpenProfile: () => _navigateTo(ScreenId.profile),
+        );
+        break;
+
+      case ScreenId.statsHistory:
+        content = StatsHistoryScreen(
+          onBack: () => _navigateTo(ScreenId.home),
+          onResumeGame: () => _navigateTo(ScreenId.gameplay),
+        );
+        break;
+
+      case ScreenId.arenaDifficulty:
+        showNavBar = true;
+        content = ArenaScreen(
+          onContinueToDraft: (levelData) => _navigateTo(ScreenId.draftPowers),
+        );
+        break;
+
+      case ScreenId.draftPowers:
+        content = DraftScreen(
+          onBack: () => _navigateTo(ScreenId.arenaDifficulty),
+          onRevealPower: (cardNum) => _navigateTo(ScreenId.powerReveal),
+        );
+        break;
+
+      case ScreenId.powerReveal:
+        content = PowerRevealScreen(
+          onStartMatch: () => _navigateTo(ScreenId.gameplay),
+        );
+        break;
+
+      case ScreenId.gameplay:
+        content = GameplayScreen(
+          onBack: () => _navigateTo(ScreenId.arenaDifficulty),
+          onGameOver: () => _navigateTo(ScreenId.gameOver),
+        );
+        break;
+
+      case ScreenId.gameOver:
+        content = GameOverScreen(
+          onPlayAgain: () => _navigateTo(ScreenId.draftPowers),
+          onGoHome: () => _navigateTo(ScreenId.home),
+        );
+        break;
+
+      case ScreenId.puzzlesList:
+        showNavBar = true;
+        content = PuzzlesScreen(
+          onSelectPuzzle: (title) {
+            setState(() => currentPuzzleTitle = title);
+            _navigateTo(ScreenId.puzzleDetail);
+          },
+        );
+        break;
+
+      case ScreenId.puzzleDetail:
+        content = PuzzleDetailScreen(
+          puzzleTitle: currentPuzzleTitle,
+          onBack: () => _navigateTo(ScreenId.puzzlesList),
+        );
+        break;
+
+      case ScreenId.leaderboard:
+        showNavBar = true;
+        content = const LeaderboardScreen();
+        break;
+
+      case ScreenId.profile:
+        showNavBar = true;
+        content = ProfileScreen(
+          onOpenAdmin: () => _navigateTo(ScreenId.adminPanel),
+          onLogout: () => _navigateTo(ScreenId.login),
+        );
+        break;
+
+      case ScreenId.adminPanel:
+        content = AdminScreen(
+          onBack: () => _navigateTo(ScreenId.profile),
+          onOpenAiPuzzleGenerator: () => _navigateTo(ScreenId.aiPuzzleGenerator),
+        );
+        break;
+
+      case ScreenId.aiPuzzleGenerator:
+        content = AiPuzzleGeneratorScreen(
+          onBack: () => _navigateTo(ScreenId.adminPanel),
+        );
+        break;
+
+      case ScreenId.register:
+        content = RegisterScreen(
+          onBack: () => _navigateTo(ScreenId.login),
+          onRegisterSuccess: () => _navigateTo(ScreenId.home),
+          onGoToLogin: () => _navigateTo(ScreenId.login),
+        );
+        break;
+
+      case ScreenId.login:
+        content = LoginScreen(
+          onLoginSuccess: () => _navigateTo(ScreenId.home),
+          onGoToRegister: () => _navigateTo(ScreenId.register),
+        );
+        break;
+    }
+
+    return Stack(
+      children: [
+        MockupPhoneFrame(
+          bottomNavigationBar: showNavBar
+              ? CustomBottomNavBar(
+                  currentIndex: currentNavIndex,
+                  onTap: _onBottomNavTap,
+                )
+              : null,
+          child: content,
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+
+        // Floating quick screen selector badge on top-right
+        Positioned(
+          top: 14,
+          right: 14,
+          child: FloatingActionButton.extended(
+            heroTag: 'mockup_switcher',
+            onPressed: _openQuickMockupPicker,
+            backgroundColor: AppColors.inkDark,
+            foregroundColor: Colors.white,
+            elevation: 4,
+            icon: const Icon(Icons.dashboard_customize_outlined, size: 16),
+            label: const Text(
+              'Mockup Navigator',
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
